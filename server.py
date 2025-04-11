@@ -477,7 +477,6 @@ def create_ai_itinerary():
         )
         
         response_content = response.choices[0].message.content.strip()
-        print("Raw OpenAI Response:", response_content)
         
         try:
             if response_content.startswith("```json"):
@@ -486,10 +485,8 @@ def create_ai_itinerary():
                 response_content = response_content[:-3]
             response_content = response_content.strip()
             
-            print("Cleaned response:", response_content)
             
             itinerary = json.loads(response_content)
-            print("Parsed JSON successfully")
             
             if len(itinerary['daily_itinerary']) != days:
                 print(f"Error: Expected {days} days but got {len(itinerary['daily_itinerary'])} days")
@@ -497,6 +494,25 @@ def create_ai_itinerary():
                     'error': f'Incomplete itinerary: Expected {days} days but got {len(itinerary["daily_itinerary"])} days',
                     'raw_response': response_content
                 }), 500
+            
+            # Store the itinerary in the database
+            conn = get_db_conn()
+            try:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        'INSERT INTO itineraries (budget, source, destination, days, preferences, itinerary_data) VALUES (%s, %s, %s, %s, %s, %s)',
+                        (budget, source, destination, days, json.dumps(preferences), json.dumps(itinerary))
+                    )
+                    itinerary_id = cursor.lastrowid
+                    conn.commit()
+            finally:
+                conn.close()
+            
+            return jsonify({
+                'status': 'success',
+                'id': itinerary_id,
+                'data': itinerary
+            })
                 
         except json.JSONDecodeError as e:
             print("JSON Parse Error:", str(e))
@@ -507,11 +523,6 @@ def create_ai_itinerary():
                 'raw_response': response_content
             }), 500
         
-        return jsonify({
-            'status': 'success',
-            'data': itinerary
-        })
-        
     except ValueError as e:
         print("ValueError:", str(e))
         return jsonify({'error': f'Invalid input: {str(e)}'}), 400
@@ -521,6 +532,60 @@ def create_ai_itinerary():
         import traceback
         print("Traceback:", traceback.format_exc())
         return jsonify({'error': str(e)}), 500
+
+@app.route('/itinerary/<int:itinerary_id>', methods=['GET'])
+def get_itinerary(itinerary_id):
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT * FROM itineraries WHERE id = %s', (itinerary_id,))
+            itinerary = cursor.fetchone()
+            if not itinerary:
+                return jsonify({'error': 'Itinerary not found'}), 404
+            
+            return jsonify({
+                'status': 'success',
+                'data': {
+                    'id': itinerary['id'],
+                    'budget': float(itinerary['budget']),
+                    'source': itinerary['source'],
+                    'destination': itinerary['destination'],
+                    'days': itinerary['days'],
+                    'preferences': json.loads(itinerary['preferences']),
+                    'itinerary': json.loads(itinerary['itinerary_data']),
+                    'created_at': itinerary['created_at'].isoformat() if itinerary['created_at'] else None
+                }
+            })
+    finally:
+        conn.close()
+
+@app.route('/itinerary', methods=['GET'])
+def get_all_itineraries():
+    conn = get_db_conn()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT * FROM itineraries ORDER BY created_at DESC')
+            itineraries = cursor.fetchall()
+            
+            result = []
+            for itinerary in itineraries:
+                result.append({
+                    'id': itinerary['id'],
+                    'budget': float(itinerary['budget']),
+                    'source': itinerary['source'],
+                    'destination': itinerary['destination'],
+                    'days': itinerary['days'],
+                    'preferences': json.loads(itinerary['preferences']),
+                    'created_at': itinerary['created_at'].isoformat() if itinerary['created_at'] else None
+                })
+            
+            return jsonify({
+                'status': 'success',
+                'count': len(result),
+                'data': result
+            })
+    finally:
+        conn.close()
 
 @app.route('/er-cont', methods=['GET'])
 def get_emergency_contacts():
