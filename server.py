@@ -22,6 +22,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+print("API key loaded:", os.getenv("OPENAI_API_KEY") is not None)
+print("API key value (truncated):", os.getenv("OPENAI_API_KEY")[:8] + "...")
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
