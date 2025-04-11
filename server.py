@@ -6,10 +6,9 @@ from datetime import datetime
 import os
 import uuid
 from werkzeug.utils import secure_filename
-from openai import OpenAI
+import openai
 from dotenv import load_dotenv
 import json
-import httpx
 
 load_dotenv()
 
@@ -22,7 +21,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'),    http_client=httpx.Client(proxies=None))
+# Initialize OpenAI client
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -466,7 +466,7 @@ def create_ai_itinerary():
         
         print("Sending prompt to OpenAI...")
         
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a professional travel planner with expertise in creating detailed itineraries. You must respond with valid JSON only, with no additional text. You must include activities for all days of the trip."},
