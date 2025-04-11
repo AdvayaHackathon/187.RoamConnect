@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 from openai import OpenAI
 from dotenv import load_dotenv
 import json
+import httpx
 
 load_dotenv()
 
@@ -21,9 +22,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-print("API key loaded:", os.getenv("OPENAI_API_KEY") is not None)
-print("API key value (truncated):", os.getenv("OPENAI_API_KEY")[:8] + "...")
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'),    http_client=httpx.Client(proxies=None))
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
