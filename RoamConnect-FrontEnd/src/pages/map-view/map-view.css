@@ -1,0 +1,31 @@
+/* Map View specific styles */
+.absolute.top-27 {
+  top: 6.75rem;
+}
+
+.w-100 {
+  width: 25rem;
+}
+
+/* Ensure the map iframe takes full height */
+iframe {
+  border: none;
+}
+
+/* Custom scrollbar for the locations list */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} 

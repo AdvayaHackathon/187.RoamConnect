@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Blueprint, Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pymysql
 from enum import Enum
@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 import openai
 from dotenv import load_dotenv
 import json
+import requests
 
 load_dotenv()
 
@@ -55,6 +56,99 @@ class Badge(Enum):
 def get_db_conn():
     return pymysql.connect(**db_config)
 
+# Initialize emergency blueprint
+# emergency_bp = Blueprint('emergency', __name__)
+# GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
+
+# @emergency_bp.route('/nearby-places', methods=['GET'])
+# def get_nearby_places():
+#     try:
+#         # Get parameters from request with validation
+#         lat = request.args.get('lat')
+#         lng = request.args.get('lng')  # Make sure to use 'lng' not 'long'
+#         place_type = request.args.get('type')
+#         radius = request.args.get('radius', '5000')  # Default 5km radius
+
+#         if not all([lat, lng, place_type]):
+#             return jsonify({
+#                 'status': 'error',
+#                 'message': 'Missing required parameters: lat, lng, and type are required'
+#             }), 400
+
+#         # Validate coordinates
+#         try:
+#             lat = float(lat)
+#             lng = float(lng)
+#             if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
+#                 return jsonify({
+#                     'status': 'error',
+#                     'message': 'Invalid coordinates: latitude must be between -90 and 90, longitude between -180 and 180'
+#                 }), 400
+#         except ValueError:
+#             return jsonify({
+#                 'status': 'error',
+#                 'message': 'Invalid parameter format: lat and lng must be numbers'
+#             }), 400
+
+#         # Call Google Places API
+#         url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json'
+#         params = {
+#             'location': f'{lat},{lng}',
+#             'radius': radius,
+#             'type': place_type,
+#             'key': GOOGLE_MAPS_API_KEY
+#         }
+
+#         response = requests.get(url, params=params)
+#         data = response.json()
+
+#         if data.get('status') == 'OK' and data.get('results'):
+#             # Process all results
+#             places = []
+#             for place in data['results']:
+#                 places.append({
+#                     'name': place['name'],
+#                     'address': place.get('vicinity', ''),
+#                     'location': place['geometry']['location'],
+#                     'place_id': place.get('place_id'),
+#                     'rating': place.get('rating'),
+#                     'types': place.get('types', [])
+#                 })
+
+#             return jsonify({
+#                 'status': 'success',
+#                 'count': len(places),
+#                 'data': places
+#             })
+#         elif data.get('status') == 'ZERO_RESULTS':
+#             return jsonify({
+#                 'status': 'success',
+#                 'count': 0,
+#                 'data': [],
+#                 'message': 'No places found within the specified radius'
+#             })
+#         else:
+#             return jsonify({
+#                 'status': 'error',
+#                 'message': f'Google Places API error: {data.get("status")}',
+#                 'details': data.get('error_message', 'Unknown error')
+#             }), 500
+
+#     except requests.exceptions.RequestException as e:
+#         return jsonify({
+#             'status': 'error',
+#             'message': 'Failed to connect to Google Places API',
+#             'details': str(e)
+#         }), 500
+#     except Exception as e:
+#         return jsonify({
+#             'status': 'error',
+#             'message': 'An unexpected error occurred',
+#             'details': str(e)
+#         }), 500
+
+# # Register the blueprint AFTER defining all routes
+# app.register_blueprint(emergency_bp, url_prefix='/api')
 
 @app.route('/tourists', methods=['GET'])
 def get_tourists():

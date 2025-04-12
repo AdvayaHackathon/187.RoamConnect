@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Profile page specific styles */
+.profile-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Custom input styles */
+input[type="email"],
+input[type="tel"],
+textarea {
+  transition: all 0.3s ease;
+}
+
+input[type="email"]:focus,
+input[type="tel"]:focus,
+textarea:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Interest tags animation */
+.interest-tag {
+  transition: transform 0.2s ease;
+}
+
+.interest-tag:hover {
+  transform: translateY(-2px);
+}
+
+/* Settings buttons hover effect */
+.settings-button {
+  transition: background-color 0.2s ease;
+}
+
+.settings-button:hover {
+  background-color: rgba(243, 244, 246, 0.8);
+}
+
+/* Profile picture upload button */
+.profile-pic-upload {
+  transition: transform 0.2s ease;
+}
+
+.profile-pic-upload:hover {
+  transform: scale(1.1);
+}
+
+/* Edit button animation */
+.edit-button {
+  transition: all 0.3s ease;
+}
+
+.edit-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+} 
